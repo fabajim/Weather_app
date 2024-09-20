@@ -30,10 +30,6 @@ def getData(kelvin):
         return celsius
 
 
-class CityNotFound(Exception):
-    pass
-
-
 class City:
     def __init__(self, city) -> None:
         self.city = city
@@ -41,7 +37,7 @@ class City:
         # order of temps: current, minimum, maximum
         self.c_temps = []
         self.f_temps = []
-        
+
     def set_data(self) -> None:
         url = BASE_URL + "appid=" + API_KEY + "&q=" + self.city
         self.data = requests.get(url).json()
@@ -73,8 +69,8 @@ class City:
 
     def get_c_temps(self) -> list:
         return self.c_temps
-    
-    def get_data(self):
+
+    def get_data(self) -> list:
         return self.data
 
 
@@ -99,6 +95,12 @@ class WeatherApp:
         if code >= 400:
             return 0
         return 1
+
+    def display_temps(self, city, degree):
+        if degree == 'F':
+            self.display_F_temps(city)
+        else:
+            self.display_C_temps(city)
 
     def display_F_temps(self, city) -> None:
         f_temps = self.cities[city].get_f_temps()
