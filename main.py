@@ -1,7 +1,3 @@
-# Author: Fabian Jimenez
-# Class:  CS361
-# Description: Weather app
-
 import src
 import os
 
@@ -22,14 +18,17 @@ def setup_city_data(city, city_obj):
 def add_to_history(history, city):
     if city in history:
         return
-    history.add(city)
+    history.append(city)
 
 
 def get_city(history, app):
     clear()
-    city = input("Please enter a city: ")
-    run_city_weather(history, app, city)
-    input("Press Enter to continue.")
+    search = 'y'
+    while search != 'n' and search != 'N':
+        city = input("Please enter a city: ")
+        city = city.upper()
+        run_city_weather(history, app, city)
+        search = input("Search another city? (y/n): ")
     clear()
 
 
@@ -45,10 +44,12 @@ def run_city_weather(history, app, city):
 def get_three_cities(history, app):
     cities = []
     count = 0
+    clear()
     print("Enter Up two three cities\n"
           "Press Enter to leave blank.\n")
     while count < 3:
         city = input("Enter a city: ")
+        city = city.upper()
         if len(city) > 0:
             cities.append(city)
         count += 1
@@ -89,7 +90,7 @@ def get_global_val():
 
 def main():
     clear()
-    session_history = set()
+    session_history = []
     weather_app = src.WeatherApp()
     print("*********************************\n"
           "*  Welcome to the weather app!  *\n"
