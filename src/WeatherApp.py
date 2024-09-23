@@ -1,25 +1,17 @@
-import requests
-import os
 import socket
-from dotenv import load_dotenv
-from datetime import datetime
+import json
 from prettytable import PrettyTable
 
 
-# Set up API
-load_dotenv()
-BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
-API_KEY = os.getenv('API_KEY')
 HOST = 'localhost'
-PORT = 5000
 
 
-def getData(kelvin):
+def get_celsius(kelvin):
     """Connects to socket and sends kelvin value to get celsius"""
     try:
         str_kelvin = str(kelvin)
         client = socket.socket()
-        client.connect((HOST, PORT))
+        client.connect((HOST, 5000))
         client.send(str_kelvin.encode())
         celsius = round(float(client.recv(1024).decode()), 2)
         client.close()
@@ -28,6 +20,20 @@ def getData(kelvin):
         return
     else:
         return celsius
+
+
+def get_API_res(city):
+    try:
+        client = socket.socket()
+        client.connect((HOST, 8000))
+        client.send(city.encode())
+        res = client.recv(1024).decode()
+        client.close()
+    except ConnectionRefusedError:
+        print('Server error, try again later.')
+        return
+    else:
+        return res
 
 
 class City:
@@ -39,8 +45,8 @@ class City:
         self.f_temps = []
 
     def set_data(self) -> None:
-        url = BASE_URL + "appid=" + API_KEY + "&q=" + self.city
-        self.data = requests.get(url).json()
+        data = get_API_res(self.city)
+        self.data = json.loads(data)
 
     def get_name(self) -> str:
         return self.city
@@ -56,7 +62,7 @@ class City:
     def set_c_temps(self, temps) -> None:
         """Insert celsius order: cur, min, max"""
         for val in temps:
-            c = getData(val)
+            c = get_celsius(val)
             self.c_temps.append(c)
 
     def set_f_temps(self) -> None:
