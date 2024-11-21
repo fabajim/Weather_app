@@ -1,5 +1,4 @@
 import socket
-# import sys
 import os
 from dotenv import load_dotenv
 import json
@@ -30,10 +29,6 @@ def get_response():
     connect.close()
 
 
-def main():
+if __name__ == '__main__':
     while True:
         get_response()
-
-
-if __name__ == '__main__':
-    main()

@@ -5,24 +5,8 @@ from prettytable import PrettyTable
 
 HOST = 'localhost'
 
-
-def get_celsius(kelvin):
-    """Connects to socket and sends kelvin value to get celsius"""
-    try:
-        str_kelvin = str(kelvin)
-        client = socket.socket()
-        client.connect((HOST, 5000))
-        client.send(str_kelvin.encode())
-        celsius = round(float(client.recv(1024).decode()), 2)
-        client.close()
-    except ConnectionRefusedError:
-        print('Server error, try again later.')
-        return
-    else:
-        return celsius
-
-
 def get_API_res(city):
+    """Microservice - get a JSON API response"""
     try:
         client = socket.socket()
         client.connect((HOST, 8000))
@@ -62,7 +46,7 @@ class City:
     def set_c_temps(self, temps) -> None:
         """Insert celsius order: cur, min, max"""
         for val in temps:
-            c = get_celsius(val)
+            c = val - 273.5
             self.c_temps.append(c)
 
     def set_f_temps(self) -> None:
@@ -78,6 +62,9 @@ class City:
 
     def get_data(self) -> list:
         return self.data
+    
+    def get_cod(self) -> str:
+        return self.data['cod']
 
 
 class WeatherApp:
@@ -90,17 +77,15 @@ class WeatherApp:
     def set_city_data(self, city):
         cur_city = self.cities[city]
         cur_city.set_data()
-        data = cur_city.get_data()
-        if not self.validate_data(data):
-            return 0
+        cod = cur_city.get_cod()
+        if not self.validate_data(cod):
+            del self.cities[city]
+            return False
         cur_city.convert_and_set_temps()
-        return 1
+        return True
 
     def validate_data(self, data):
-        code = int(data['cod'])
-        if code >= 400:
-            return 0
-        return 1
+        return int(data) < 400
 
     def display_temps(self, city, degree):
         if degree == 'F':
@@ -122,3 +107,10 @@ class WeatherApp:
         table.add_row([city, f'{int(temps[0])}{type}\xb0', f'{int(temps[1])}'
                        f'{type}\xb0', f'{int(temps[2])}{type}\xb0'])
         print('\n', table, '\n')
+
+    def print_cities(self, degree):
+        """Prints the temps from all cities in cites dict."""
+        if not self.cities:
+            print("Nothing in search history.")
+        for city in self.cities:
+            self.display_temps(city, degree)
